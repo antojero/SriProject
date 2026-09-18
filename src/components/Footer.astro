@@ -1,0 +1,59 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+          <img 
+            src="/images/logo.png" 
+            alt="Creamy Delights Logo" 
+            width="56" 
+            height="56" 
+            style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.3);" 
+          />
+          <h3 style="margin: 0; color: #ffffff;">Creamy Delights</h3>
+        </div>
+        <p>
+          Artisanal handcrafted celebration cakes, custom designs, and sweet memories built fresh in Tirunelveli.
+        </p>
+      </div>
+
+      <div class="footer-links">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About Us</a></li>
+          <li><a href="/cakes">Cakes Catalogue</a></li>
+          <li><a href="/gallery">Media Gallery</a></li>
+          <li><a href="/contact">Contact & Enquiry</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-contact">
+        <h4>Connect & Order</h4>
+        <p style="color: #c4b5b9; margin-bottom: 12px;">
+          📍 Tirunelveli, Tamil Nadu, India
+        </p>
+        <p style="color: #c4b5b9; margin-bottom: 16px;">
+          📞 WhatsApp: <strong>+91 9159799861</strong>
+        </p>
+        <a 
+          class="btn btn-primary" 
+          href="https://wa.me/919159799861?text=Hi%20Creamy%20Delights%2C%20I%27d%20like%20to%20enquire%20about%20a%20cake." 
+          target="_blank" 
+          rel="noopener noreferrer"
+        >
+          Chat on WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; {currentYear} Creamy Delights Tirunelveli. All rights reserved.</p>
+      <p>Bake with love & care.</p>
+    </div>
+  </div>
+</footer>

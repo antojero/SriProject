@@ -1,0 +1,205 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Gallery | Creamy Delights Tirunelveli"
+  description="Explore cake designs, decorations, wedding setups, and cake-making moments from Creamy Delights."
+>
+  <section class="section page-hero" style="padding-bottom: 24px;">
+    <div class="container narrow" style="text-align: center;">
+      <p class="eyebrow">Media Gallery</p>
+      <h1>A little look at our creations.</h1>
+      <p style="font-size: 18px; margin-top: 14px;">
+        Browse custom cake designs and celebration creations loaded directly from our studio database.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      <!-- Dynamic Category Filter Tabs from Database -->
+      <div class="gallery-filters" style="justify-content: center; margin-bottom: 36px;" id="filterContainer">
+        <button class="filter active" data-gallery-filter="All">All</button>
+      </div>
+
+      <!-- Loading State Indicator -->
+      <div id="loadingIndicator" style="text-align: center; padding: 48px 0; color: var(--muted); font-size: 16px;">
+        <div style="display: inline-block; width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;"></div>
+        <div>Loading gallery from database...</div>
+      </div>
+
+      <!-- Empty State Notice -->
+      <div id="emptyNotice" style="display: none; text-align: center; padding: 48px 24px; background: var(--surface); border: 1px dashed var(--border); border-radius: 22px; max-width: 600px; margin: 0 auto;">
+        <h3 style="font-size: 24px; color: var(--text); margin-bottom: 10px;">No Gallery Items Found</h3>
+        <p style="margin-bottom: 20px;">No items match this category yet. Add new items in Django Admin under GALLERY → Media items or CAKES → Cakes!</p>
+        <a class="btn btn-secondary" href="http://localhost:8000/admin/" target="_blank" rel="noopener noreferrer">
+          ⚙️ Open Django Admin
+        </a>
+      </div>
+
+      <!-- Dynamic Masonry Media Grid -->
+      <div class="gallery-grid" id="galleryGrid" style="display: none;"></div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+<script>
+  interface MediaItem {
+    id: number;
+    type: 'image' | 'video' | 'reel';
+    category: string;
+    title: string;
+    src: string;
+    description?: string;
+  }
+
+  let currentCategory = 'All';
+  let databaseItems: MediaItem[] = [];
+
+  const loadingIndicator = document.getElementById('loadingIndicator');
+  const galleryGrid = document.getElementById('galleryGrid');
+  const emptyNotice = document.getElementById('emptyNotice');
+  const filterContainer = document.getElementById('filterContainer');
+
+  async function loadDatabaseGallery() {
+    try {
+      const apiHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'http://localhost:8000'
+        : '';
+
+      const items: MediaItem[] = [];
+      const categoriesSet = new Set<string>(['All']);
+
+      // 1. Fetch Media Items from GALLERY -> Media items
+      const mediaRes = await fetch(`${apiHost}/api/gallery/`);
+      if (mediaRes.ok) {
+        const mediaData = await mediaRes.json();
+        if (Array.isArray(mediaData)) {
+          mediaData.forEach((media: any) => {
+            const mediaSrc = media.src || media.image_url || media.file;
+            if (mediaSrc) {
+              const cat = media.category || 'Gallery';
+              categoriesSet.add(cat);
+              items.push({
+                id: media.id,
+                type: media.type || 'image',
+                category: cat,
+                title: media.title || 'Studio Creation',
+                src: mediaSrc
+              });
+            }
+          });
+        }
+      }
+
+      // 2. Fetch Cakes from CAKES -> Cakes
+      const cakesRes = await fetch(`${apiHost}/api/cakes/`);
+      if (cakesRes.ok) {
+        const cakesData = await cakesRes.json();
+        if (Array.isArray(cakesData)) {
+          cakesData.forEach((cake: any) => {
+            const cakeImg = cake.image_url || cake.image;
+            if (cakeImg) {
+              const cat = 'Cakes';
+              categoriesSet.add(cat);
+              items.push({
+                id: 10000 + cake.id,
+                type: 'image',
+                category: cat,
+                title: cake.name,
+                src: cakeImg,
+                description: cake.description
+              });
+            }
+          });
+        }
+      }
+
+      databaseItems = items;
+
+      // 3. Render filter buttons based on actual database categories!
+      if (filterContainer) {
+        const categoryList = Array.from(categoriesSet);
+        filterContainer.innerHTML = categoryList.map((catName) => `
+          <button class="filter ${catName.toLowerCase() === currentCategory.toLowerCase() ? 'active' : ''}" data-gallery-filter="${catName}">
+            ${catName}
+          </button>
+        `).join('');
+
+        attachFilterEvents();
+      }
+
+    } catch (err) {
+      console.error('Error fetching gallery from database:', err);
+    } finally {
+      if (loadingIndicator) loadingIndicator.style.display = 'none';
+      renderGallery();
+    }
+  }
+
+  function renderGallery() {
+    if (!galleryGrid || !emptyNotice) return;
+
+    const filteredItems = databaseItems.filter(item => {
+      if (currentCategory === 'All') return true;
+      return item.category.toLowerCase() === currentCategory.toLowerCase();
+    });
+
+    if (filteredItems.length === 0) {
+      galleryGrid.style.display = 'none';
+      emptyNotice.style.display = 'block';
+      return;
+    }
+
+    emptyNotice.style.display = 'none';
+    galleryGrid.style.display = 'block';
+
+    galleryGrid.innerHTML = filteredItems.map(item => {
+      let mediaHtml = '';
+      if (item.type === 'video') {
+        mediaHtml = `<video controls muted playsinline preload="metadata" style="width:100%; border-radius:18px;">
+          <source src="${item.src}" type="video/mp4" />
+        </video>`;
+      } else {
+        mediaHtml = `<img src="${item.src}" alt="${item.title}" loading="lazy" style="width:100%; object-fit:cover; border-radius:18px;" />`;
+      }
+
+      return `
+        <figure class="gallery-item" style="break-inside: avoid; margin-bottom: 20px; border-radius: 20px; overflow: hidden; background: var(--surface); border: 1px solid var(--border);">
+          ${mediaHtml}
+          <figcaption style="padding: 16px; background: var(--surface); border-top: 1px solid var(--border);">
+            <span class="card-kicker">${item.category}</span>
+            <h4 style="font-size: 18px; margin: 4px 0 2px; color: var(--text);">${item.title}</h4>
+            ${item.description ? `<p style="font-size: 13px; color: var(--muted); margin: 4px 0 0;">${item.description}</p>` : ''}
+          </figcaption>
+        </figure>
+      `;
+    }).join('');
+  }
+
+  function attachFilterEvents() {
+    const filterBtns = document.querySelectorAll('.filter[data-gallery-filter]');
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        currentCategory = btn.getAttribute('data-gallery-filter') || 'All';
+        renderGallery();
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    attachFilterEvents();
+    loadDatabaseGallery();
+  });
+</script>

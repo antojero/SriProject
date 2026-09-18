@@ -1,0 +1,100 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+---
+
+<BaseLayout
+  title="About Creamy Delights | Tirunelveli"
+  description="Learn about Creamy Delights, our passion for handcrafted artisanal celebration cakes, and our approach to baking in Tirunelveli."
+>
+  <!-- Page Hero -->
+  <section class="section page-hero" style="padding-bottom: 16px;">
+    <div class="container narrow" style="text-align: center;">
+      <p class="eyebrow">About us</p>
+      <h1>Made with care, created for your moments.</h1>
+      <p style="font-size: 19px; margin-top: 14px; line-height: 1.6;">
+        Creamy Delights is a boutique custom cake studio based in Tirunelveli, dedicated to transforming your special moments into delicious, visually captivating edible art.
+      </p>
+    </div>
+  </section>
+
+  <!-- Editorial Split Story -->
+  <section class="section" style="padding-top: 24px;">
+    <div class="container split-section">
+      <div class="image-card">
+        <img 
+          src="/images/about-baker.webp" 
+          alt="Creamy Delights cake artist preparing a custom cake" 
+          width="900" 
+          height="1100" 
+          loading="lazy" 
+        />
+      </div>
+      <div>
+        <p class="eyebrow">Our story & passion</p>
+        <h2>A cake should feel as special as the occasion.</h2>
+        <p style="margin: 20px 0 28px; font-size: 16px; line-height: 1.7;">
+          Founded with a devotion to authentic baking and delicate pastry aesthetics, Creamy Delights believes every birthday, wedding, and milestone deserves more than just a sweet dessert—it deserves a centerpiece.
+        </p>
+
+        <div class="feature-list">
+          <div>
+            <strong>Custom designs</strong>
+            <span>Built around your personal occasion, theme, color palette, and preferred flavor profile.</span>
+          </div>
+          <div>
+            <strong>Careful finishing</strong>
+            <span>From smooth ganache drips to hand-piped buttercream florals, attention to detail is paramount.</span>
+          </div>
+          <div>
+            <strong>Personal service</strong>
+            <span>Direct WhatsApp consultation for effortless enquiry, custom quotes, and timely Tirunelveli delivery.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Baking Philosophy / Pillars -->
+  <section class="section" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+      <SectionHeading 
+        eyebrow="Our commitment" 
+        title="What sets our cakes apart" 
+        centered={true}
+      />
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px;">
+        <div style="padding: 32px; background: var(--bg); border-radius: 22px; border: 1px solid var(--border);">
+          <h3 style="font-size: 26px; color: var(--accent); margin-bottom: 12px;">01. Pure Ingredients</h3>
+          <p style="margin: 0; font-size: 15px;">
+            We bake with real butter, premium cocoa, pure vanilla beans, and fresh local dairy. No shortcuts, artificial preservatives, or compound compromises.
+          </p>
+        </div>
+
+        <div style="padding: 32px; background: var(--bg); border-radius: 22px; border: 1px solid var(--border);">
+          <h3 style="font-size: 26px; color: var(--accent); margin-bottom: 12px;">02. Freshly Baked</h3>
+          <p style="margin: 0; font-size: 15px;">
+            Cakes are never frozen or pre-stored for days. Each cake is baked fresh to order strictly according to your celebration timeline.
+          </p>
+        </div>
+
+        <div style="padding: 32px; background: var(--bg); border-radius: 22px; border: 1px solid var(--border);">
+          <h3 style="font-size: 26px; color: var(--accent); margin-bottom: 12px;">03. Local Tirunelveli Care</h3>
+          <p style="margin: 0; font-size: 15px;">
+            Rooted in Tirunelveli, we provide personal care, warm customer service, and reliable direct coordination on every cake order.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact CTA -->
+  <section class="section" style="text-align: center;">
+    <div class="container narrow">
+      <p class="eyebrow">Ready to discuss your cake?</p>
+      <h2 style="margin-bottom: 20px;">Let's make your celebration sweet.</h2>
+      <a class="btn btn-primary" href="/contact">Get in Touch with Us</a>
+    </div>
+  </section>
+</BaseLayout>

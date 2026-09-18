@@ -1,0 +1,155 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CakeCard from "../components/CakeCard.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+import { cakes } from "../data/cakes";
+
+const featuredCakes = cakes.filter((cake) => cake.featured).slice(0, 6);
+---
+
+<BaseLayout
+  title="Creamy Delights | Custom Cakes in Tirunelveli"
+  description="Explore handcrafted custom celebration cakes, red velvet, chocolate truffle, and wedding cakes from Creamy Delights in Tirunelveli."
+>
+  <!-- Hero Section -->
+  <section class="section hero">
+    <div class="container hero-grid">
+      <div>
+        <p class="eyebrow">Baked for your sweetest moments</p>
+        <h1>Beautiful cakes, made to make every celebration special.</h1>
+        <p class="hero-text">
+          Discover handcrafted cakes and custom creations baked fresh with premium ingredients from Creamy Delights in Tirunelveli.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="/cakes">Explore Cakes</a>
+          <a 
+            class="btn btn-secondary" 
+            href="https://wa.me/919159799861?text=Hi%20Creamy%20Delights%2C%20I%27d%20like%20to%20order%20a%20custom%20cake." 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            Order on WhatsApp
+          </a>
+        </div>
+      </div>
+      <div class="hero-media">
+        <img 
+          src="/images/hero-cake.webp" 
+          alt="Featured Creamy Delights multi-tier celebration cake" 
+          width="900" 
+          height="1100" 
+          fetchpriority="high"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Cakes Section -->
+  <section class="section" style="background: rgba(255, 255, 255, 0.6); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+      <SectionHeading 
+        eyebrow="Our favourites" 
+        title="Made for every celebration" 
+        description="Every cake is thoughtfully designed, baked fresh to order, and finished with meticulous detail."
+      />
+      <div class="cake-grid">
+        {featuredCakes.map((cake) => (
+          <CakeCard cake={cake} />
+        ))}
+      </div>
+      <div style="text-align: center; margin-top: 48px;">
+        <a href="/cakes" class="btn btn-secondary">View Complete Catalogue →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Behind the scenes video section -->
+  <section class="section">
+    <div class="container">
+      <div class="video-grid">
+        <div>
+          <p class="eyebrow">Behind the scenes</p>
+          <h2 style="font-size: clamp(32px, 4vw, 52px);">From batter to beautiful.</h2>
+          <p style="margin: 20px 0 28px; font-size: 16px;">
+            Watch how our pastry chef transforms raw, quality ingredients into exquisite multi-layered celebration art for Tirunelveli families and moments.
+          </p>
+          <div class="feature-list" style="margin-top: 0;">
+            <div>
+              <strong>100% Freshly Baked</strong>
+              <span>Baked only upon confirmed order for optimal taste and softness.</span>
+            </div>
+            <div>
+              <strong>Custom Flavor Crafting</strong>
+              <span>Adjust sweetness, layers, and toppings to your personal preference.</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <img 
+            src="/images/about-baker.webp" 
+            alt="Pastry chef decorating custom cake at Creamy Delights" 
+            style="border-radius: 24px; box-shadow: 0 16px 36px rgba(0,0,0,0.08);"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Real Client Testimonials -->
+  <section class="section" style="background: #fffdfb; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+      <SectionHeading 
+        eyebrow="Sweet Testimonials" 
+        title="Loved by Tirunelveli celebrations" 
+        centered={true}
+      />
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+        <div style="background: var(--surface); padding: 32px; border-radius: 22px; border: 1px solid var(--border);">
+          <div style="color: #e5a720; margin-bottom: 12px; font-size: 18px;">★★★★★</div>
+          <p style="font-style: italic; color: var(--text); font-size: 16px; line-height: 1.6; margin-bottom: 16px;">
+            "The Red Velvet cake from Creamy Delights was the highlight of my daughter's birthday! Soft, perfectly sweetened, and delivered right on time in Tirunelveli."
+          </p>
+          <strong style="color: var(--accent); font-size: 15px;">— Ananya R.</strong>
+        </div>
+
+        <div style="background: var(--surface); padding: 32px; border-radius: 22px; border: 1px solid var(--border);">
+          <div style="color: #e5a720; margin-bottom: 12px; font-size: 18px;">★★★★★</div>
+          <p style="font-style: italic; color: var(--text); font-size: 16px; line-height: 1.6; margin-bottom: 16px;">
+            "Ordered a 2-tier custom wedding cake via WhatsApp. The finishing and ganache taste was world class. Highly recommended!"
+          </p>
+          <strong style="color: var(--accent); font-size: 15px;">— Karthik & Priya</strong>
+        </div>
+
+        <div style="background: var(--surface); padding: 32px; border-radius: 22px; border: 1px solid var(--border);">
+          <div style="color: #e5a720; margin-bottom: 12px; font-size: 18px;">★★★★★</div>
+          <p style="font-style: italic; color: var(--text); font-size: 16px; line-height: 1.6; margin-bottom: 16px;">
+            "Chocolate Truffle was rich, glossy, and fresh. Super easy to order on WhatsApp with quick response time."
+          </p>
+          <strong style="color: var(--accent); font-size: 15px;">— Dinesh Kumar</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final WhatsApp CTA Banner -->
+  <section class="section" style="padding: 80px 0;">
+    <div class="container" style="background: var(--text); color: #fff; padding: 60px 40px; border-radius: 36px; text-align: center; position: relative; overflow: hidden;">
+      <div style="max-width: 680px; margin: 0 auto; position: relative; z-index: 2;">
+        <p class="eyebrow" style="color: #e9b3bc;">Planning a celebration?</p>
+        <h2 style="color: #fff; font-size: clamp(36px, 5vw, 60px); margin-bottom: 16px;">Let's bake something memorable together.</h2>
+        <p style="color: #c4b5b9; font-size: 18px; margin-bottom: 32px;">
+          Send us your ideas, dates, or flavor preferences on WhatsApp and we'll craft the perfect custom cake for you.
+        </p>
+        <a 
+          class="btn btn-primary" 
+          style="background: #2f7d4a; padding: 16px 36px; font-size: 17px;"
+          href="https://wa.me/919159799861?text=Hi%20Creamy%20Delights%2C%20I%27d%20like%20to%20plan%20a%20cake%20for%20an%20upcoming%20celebration." 
+          target="_blank" 
+          rel="noopener noreferrer"
+        >
+          💬 Chat with us on WhatsApp (+91 9159799861)
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

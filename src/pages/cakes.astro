@@ -1,0 +1,125 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Cakes Catalogue | Creamy Delights Tirunelveli"
+  description="Browse custom celebration cakes, red velvet, chocolate truffle, and custom creations from Creamy Delights in Tirunelveli."
+>
+  <section class="section page-hero" style="padding-bottom: 24px;">
+    <div class="container narrow" style="text-align: center;">
+      <p class="eyebrow">Our cakes</p>
+      <h1>Something sweet for every celebration.</h1>
+      <p style="font-size: 18px; margin-top: 14px;">
+        Browse our handcrafted cake collection below. Click enquire to message us directly on WhatsApp for availability and custom ordering.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      <!-- Loading Indicator -->
+      <div id="cakesLoading" style="text-align: center; padding: 48px 0; color: var(--muted); font-size: 16px;">
+        <div style="display: inline-block; width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;"></div>
+        <div>Loading cakes from backend...</div>
+      </div>
+
+      <!-- Empty Notice -->
+      <div id="cakesEmpty" style="display: none; text-align: center; padding: 48px 24px; background: var(--surface); border: 1px dashed var(--border); border-radius: 22px; max-width: 600px; margin: 0 auto;">
+        <h3 style="font-size: 24px; color: var(--text); margin-bottom: 10px;">No Cakes Added Yet</h3>
+        <p style="margin-bottom: 20px;">Add your delicious cakes in Django Admin under CAKES → Cakes!</p>
+        <a class="btn btn-secondary" href="http://localhost:8000/admin/cakes/cake/" target="_blank" rel="noopener noreferrer">
+          ⚙️ Open Cakes Admin
+        </a>
+      </div>
+
+      <!-- Cakes Responsive Grid -->
+      <div class="cake-grid" id="cakeGrid" style="display: none;"></div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+<script>
+  interface CakeData {
+    id: number;
+    name: string;
+    image_url?: string;
+    image?: string;
+    description: string;
+    featured?: boolean;
+  }
+
+  const cakeGrid = document.getElementById('cakeGrid');
+  const loadingIndicator = document.getElementById('cakesLoading');
+  const emptyNotice = document.getElementById('cakesEmpty');
+
+  async function loadBackendCakes() {
+    try {
+      const apiHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'http://localhost:8000'
+        : '';
+
+      const cakesRes = await fetch(`${apiHost}/api/cakes/`);
+      if (cakesRes.ok) {
+        const apiCakes: CakeData[] = await cakesRes.json();
+        if (Array.isArray(apiCakes) && apiCakes.length > 0) {
+          renderCakes(apiCakes);
+          return;
+        }
+      }
+      showEmpty();
+    } catch (err) {
+      console.error('Error fetching cakes from backend:', err);
+      showEmpty();
+    } finally {
+      if (loadingIndicator) loadingIndicator.style.display = 'none';
+    }
+  }
+
+  function showEmpty() {
+    if (cakeGrid) cakeGrid.style.display = 'none';
+    if (emptyNotice) emptyNotice.style.display = 'block';
+  }
+
+  function renderCakes(cakesList: CakeData[]) {
+    if (!cakeGrid || !emptyNotice) return;
+
+    if (cakesList.length === 0) {
+      showEmpty();
+      return;
+    }
+
+    emptyNotice.style.display = 'none';
+    cakeGrid.style.display = 'grid';
+
+    cakeGrid.innerHTML = cakesList.map(cake => {
+      const img = cake.image_url || cake.image || '/images/hero-cake.webp';
+      const msg = encodeURIComponent(`Hi Creamy Delights, I'd like to enquire about ordering the ${cake.name}.`);
+      const whatsappLink = `https://wa.me/919159799861?text=${msg}`;
+
+      return `
+        <article class="cake-card">
+          <a href="${whatsappLink}" target="_blank" rel="noopener noreferrer" class="cake-image-wrap" aria-label="Enquire about ${cake.name}">
+            <img src="${img}" alt="${cake.name}" width="700" height="850" loading="lazy" />
+          </a>
+          <div class="cake-card-body">
+            <h3>${cake.name}</h3>
+            <p>${cake.description || 'Delicious handcrafted celebration cake made fresh to order in Tirunelveli.'}</p>
+            <div class="cake-meta" style="justify-content: flex-end;">
+              <a href="${whatsappLink}" target="_blank" rel="noopener noreferrer">Enquire on WhatsApp →</a>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', loadBackendCakes);
+</script>

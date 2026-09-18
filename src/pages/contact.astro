@@ -1,0 +1,135 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Contact Creamy Delights | Tirunelveli"
+  description="Contact Creamy Delights in Tirunelveli for custom cake orders, pricing quotes, and celebration queries."
+>
+  <section class="section page-hero" style="padding-bottom: 40px;">
+    <div class="container narrow" style="text-align: center;">
+      <p class="eyebrow">Let's create something sweet</p>
+      <h1>Tell us what you're celebrating.</h1>
+      <p style="font-size: 18px; margin-top: 14px;">
+        Send us an enquiry form or message us on WhatsApp and we'll help you plan the perfect cake for your date.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="container contact-grid">
+      <div>
+        <!-- Location Card -->
+        <div class="contact-card">
+          <span class="card-kicker">Location & Service Area</span>
+          <h2>Tirunelveli</h2>
+          <p style="margin-bottom: 0;">
+            Serving cake orders, custom birthday designs, and wedding celebrations throughout Tirunelveli, Tamil Nadu.
+          </p>
+        </div>
+
+        <!-- WhatsApp Card -->
+        <div class="contact-card" style="border-color: rgba(47, 125, 74, 0.3); background: #f4fbf6;">
+          <span class="card-kicker" style="color: #2f7d4a;">Fastest Response</span>
+          <h2 style="color: #1b4b2c; font-size: 36px; margin: 4px 0 14px;">+91 9159799861</h2>
+          <a 
+            class="btn btn-primary" 
+            style="background: #2f7d4a; width: 100%; border-radius: 999px;"
+            href="https://wa.me/919159799861?text=Hi%20Creamy%20Delights%2C%20I%27d%20like%20to%20enquire%20about%20a%20cake." 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            💬 Chat on WhatsApp
+          </a>
+        </div>
+
+        <!-- Google Maps Frame -->
+        <div class="map-frame">
+          <iframe 
+            title="Creamy Delights location in Tirunelveli" 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63134.4699505877!2d77.67499695!3d8.71391265!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b04116035f8d689%3A0x6a053c89b88220f8!2sTirunelveli%2C%20Tamil%20Nadu!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin" 
+            loading="lazy"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </div>
+
+      <!-- Interactive Enquiry Form -->
+      <div>
+        <form class="enquiry-form" id="enquiryForm">
+          <h3 style="font-size: 28px; margin-bottom: 8px;">Send Cake Enquiry</h3>
+          <p style="font-size: 14px; margin-bottom: 20px;">
+            Fill in your details below to send us your request directly or open it in WhatsApp.
+          </p>
+
+          <label>
+            Your Name *
+            <input name="name" type="text" autocomplete="name" required placeholder="e.g. Priya Sharma" />
+          </label>
+
+          <label>
+            Phone Number *
+            <input name="phone" type="tel" autocomplete="tel" required placeholder="e.g. 9876543210" />
+          </label>
+
+          <label>
+            Cake Type / Theme
+            <input name="cake_type" type="text" placeholder="e.g. Red Velvet 2-tier Birthday Cake" />
+          </label>
+
+          <label>
+            Required Event Date
+            <input name="required_date" type="date" />
+          </label>
+
+          <label>
+            Special Instructions / Message
+            <textarea name="message" rows="4" placeholder="Tell us about guests count, flavor choices, or custom text..."></textarea>
+          </label>
+
+          <div style="display: grid; gap: 12px; margin-top: 10px;">
+            <button class="btn btn-primary" type="submit" id="submitBtn">
+              Send Enquiry via WhatsApp →
+            </button>
+          </div>
+
+          <div id="formStatus" style="display: none; padding: 14px; border-radius: 12px; background: #eef9f2; border: 1px solid #bce6c9; color: #1e5c33; font-size: 14px; font-weight: 600; text-align: center; margin-top: 10px;">
+            ✓ Redirecting to WhatsApp with your order summary...
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('enquiryForm') as HTMLFormElement;
+  const statusDiv = document.getElementById('formStatus');
+
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const name = formData.get('name') || '';
+      const phone = formData.get('phone') || '';
+      const cakeType = formData.get('cake_type') || 'Custom Cake';
+      const date = formData.get('required_date') || 'Flexible';
+      const message = formData.get('message') || '';
+
+      const text = `Hi Creamy Delights!
+New Enquiry from Website:
+• Name: ${name}
+• Phone: ${phone}
+• Cake Type: ${cakeType}
+• Event Date: ${date}
+• Message: ${message}`;
+
+      if (statusDiv) statusDiv.style.display = 'block';
+
+      setTimeout(() => {
+        window.open(`https://wa.me/919159799861?text=${encodeURIComponent(text)}`, '_blank');
+      }, 500);
+    });
+  }
+</script>

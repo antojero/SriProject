@@ -1,0 +1,77 @@
+---
+const links = [
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Cakes", href: "/cakes" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Contact", href: "/contact" },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="/" style="display: flex; align-items: center; gap: 12px;">
+      <img 
+        src="/images/logo.png" 
+        alt="Creamy Delights Logo" 
+        width="46" 
+        height="46" 
+        style="width: 46px; height: 46px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 8px rgba(155, 91, 104, 0.25);"
+      />
+      <span>Creamy <span>Delights</span></span>
+    </a>
+    
+    <nav class="desktop-nav" aria-label="Primary navigation">
+      {links.map((link) => {
+        const isActive = currentPath === link.href || (link.href !== "/" && currentPath.startsWith(link.href));
+        return (
+          <a href={link.href} class={isActive ? "active" : ""}>
+            {link.label}
+          </a>
+        );
+      })}
+    </nav>
+    
+    <a 
+      class="header-cta" 
+      href="https://wa.me/919159799861?text=Hi%20Creamy%20Delights%2C%20I%27d%20like%20to%20enquire%20about%20a%20cake." 
+      target="_blank" 
+      rel="noopener noreferrer"
+    >
+      Order on WhatsApp
+    </a>
+
+    <button class="mobile-menu-btn" id="menuToggle" aria-label="Toggle navigation menu">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+  </div>
+
+  <div class="mobile-drawer" id="mobileDrawer">
+    {links.map((link) => (
+      <a href={link.href}>{link.label}</a>
+    ))}
+    <a 
+      href="https://wa.me/919159799861?text=Hi%20Creamy%20Delights%2C%20I%27d%20like%20to%20enquire%20about%20a%20cake."
+      target="_blank"
+      rel="noopener noreferrer"
+      style="color: var(--accent); margin-top: 8px;"
+    >
+      💬 Order on WhatsApp (9159799861)
+    </a>
+  </div>
+</header>
+
+<script>
+  const toggleBtn = document.getElementById('menuToggle');
+  const mobileDrawer = document.getElementById('mobileDrawer');
+
+  if (toggleBtn && mobileDrawer) {
+    toggleBtn.addEventListener('click', () => {
+      mobileDrawer.classList.toggle('is-open');
+    });
+  }
+</script>

@@ -1,0 +1,36 @@
+---
+interface Props {
+  cake: {
+    id?: number;
+    name: string;
+    image: string;
+    description: string;
+    featured?: boolean;
+  };
+}
+
+const { cake } = Astro.props;
+const whatsappMessage = `Hi Creamy Delights, I'd like to enquire about ordering the ${cake.name}.`;
+const whatsappLink = `https://wa.me/919159799861?text=${encodeURIComponent(whatsappMessage)}`;
+---
+
+<article class="cake-card">
+  <a href={whatsappLink} target="_blank" rel="noopener noreferrer" class="cake-image-wrap" aria-label={`Enquire about ${cake.name}`}>
+    <img 
+      src={cake.image} 
+      alt={cake.name}
+      width="700" 
+      height="850" 
+      loading="lazy" 
+    />
+  </a>
+  <div class="cake-card-body">
+    <h3>{cake.name}</h3>
+    <p>{cake.description}</p>
+    <div class="cake-meta" style="justify-content: flex-end;">
+      <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
+        Enquire on WhatsApp →
+      </a>
+    </div>
+  </div>
+</article>
