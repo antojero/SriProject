@@ -2,12 +2,12 @@
 nixPkgs = ["python312", "gcc"]
 
 [phases.install]
-cmds = ["pip install -r backend/requirements.txt"]
+cmds = ["python3 -m pip install -r backend/requirements.txt"]
 
 [phases.build]
 cmds = [
-  "cd backend && python manage.py collectstatic --noinput",
-  "cd backend && python manage.py migrate --noinput"
+  "cd backend && python3 manage.py collectstatic --noinput",
+  "cd backend && python3 manage.py migrate --noinput"
 ]
 
 [start]
