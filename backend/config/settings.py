@@ -85,4 +85,10 @@ MEDIA_ROOT = BASE_DIR / "media"
 # CORS: allow all origins (Cloudflare Pages frontend + local dev)
 CORS_ALLOW_ALL_ORIGINS = True
 
+# CSRF trusted origins — required for Django 4.0+ HTTPS admin login
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS",
+    "https://sriproject-production.up.railway.app,https://*.up.railway.app"
+).split(",")
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
