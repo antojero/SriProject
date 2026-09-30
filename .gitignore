@@ -13,9 +13,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# environment variables
+# environment variables — never commit real secrets
 .env
-.env.production
+.env.*
+!.env.example
 
 # macOS-specific files
 .DS_Store
@@ -23,9 +24,14 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# Python / Django backend (not deployed to Cloudflare Pages)
+# Python / Django backend
 backend/__pycache__/
 backend/**/__pycache__/
+**/__pycache__/
 backend/db.sqlite3
 backend/media/
 backend/**/*.pyc
+*.pyc
+
+# Django collected static files (generated at build time)
+backend/staticfiles/

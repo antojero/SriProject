@@ -1,15 +1,21 @@
 import os
 from pathlib import Path
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-creamy-delights-key-change-in-prod")
+# ─── Security ─────────────────────────────────────────────────────────────────
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]  # Hard-fail if not set in production
 
-# Production: set DEBUG=False via Railway env var
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv("ALLOWED_HOSTS", "").split(",")
+    if host.strip()
+]
 
+# ─── Applications ─────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -57,38 +63,82 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+# ─── Database ─────────────────────────────────────────────────────────────────
+# Production: DATABASE_URL must be set (Railway PostgreSQL auto-provides this).
+# Local dev fallback: SQLite when DATABASE_URL is not present.
+_database_url = os.getenv("DATABASE_URL")
 
+if _database_url:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            _database_url,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
+# ─── Password Validation ──────────────────────────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# ─── Internationalisation ─────────────────────────────────────────────────────
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
 
+# ─── Static Files (WhiteNoise) ────────────────────────────────────────────────
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-# WhiteNoise compressed static file storage
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
+# ─── Media Files (Railway Persistent Volume at /data) ─────────────────────────
+# Production: Railway Volume must be mounted at /data  →  MEDIA_ROOT = /data/media
+# Local dev:  Override with MEDIA_ROOT env var or defaults to backend/media/
+_media_root_env = os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))
+MEDIA_ROOT = Path(_media_root_env)
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
 
-# CORS: allow all origins (Cloudflare Pages frontend + local dev)
-CORS_ALLOW_ALL_ORIGINS = True
+# Ensure required media subdirectories exist at Django startup
+for _subdir in ["cakes", "gallery", "gallery/thumbnails"]:
+    (MEDIA_ROOT / _subdir).mkdir(parents=True, exist_ok=True)
 
-# CSRF trusted origins — required for Django 4.0+ HTTPS admin login
-CSRF_TRUSTED_ORIGINS = os.getenv(
-    "CSRF_TRUSTED_ORIGINS",
-    "https://sriproject-production.up.railway.app,https://*.up.railway.app"
-).split(",")
+# ─── CORS ─────────────────────────────────────────────────────────────────────
+# In production Astro + Django serve from the same domain — CORS is not needed.
+# In local dev Astro runs on :4321 and Django on :8000, so allow localhost.
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # True only in local dev
 
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ALLOWED_ORIGINS", "http://localhost:4321,http://127.0.0.1:4321"
+    ).split(",")
+    if origin.strip()
+]
+
+# ─── CSRF ─────────────────────────────────────────────────────────────────────
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
+# ─── Production HTTPS Security Headers ───────────────────────────────────────
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# ─── Default PK ───────────────────────────────────────────────────────────────
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

@@ -4,10 +4,16 @@ from django.urls import path, re_path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 
 DIST_DIR = settings.BASE_DIR.parent / "dist"
 
+# ─── Health Check ─────────────────────────────────────────────────────────────
+def health_check(request):
+    """Simple health check endpoint for Railway. Returns HTTP 200."""
+    return JsonResponse({"status": "ok"})
+
+# ─── Astro Frontend Catch-all ─────────────────────────────────────────────────
 def serve_astro_frontend(request, path=""):
     clean_path = path.strip("/")
     if not clean_path:
@@ -18,7 +24,7 @@ def serve_astro_frontend(request, path=""):
             target_file = DIST_DIR / clean_path / "index.html"
 
     if target_file.exists() and target_file.is_file():
-        content_type = "text/html"
+        content_type = "text/html; charset=utf-8"
         suffix = target_file.suffix.lower()
         if suffix == ".css":
             content_type = "text/css"
@@ -34,18 +40,32 @@ def serve_astro_frontend(request, path=""):
             content_type = "image/png"
         elif suffix == ".mp4":
             content_type = "video/mp4"
+        elif suffix == ".ico":
+            content_type = "image/x-icon"
 
         with open(target_file, "rb") as f:
             return HttpResponse(f.read(), content_type=content_type)
 
     raise Http404("Frontend page not found")
 
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('cakes.urls')),
-    path('', include('gallery.urls')),
-    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-    re_path(r'^(?P<path>.*)$', serve_astro_frontend),
+    # ── Django built-ins ──────────────────────────────────────────────────────
+    path("admin/", admin.site.urls),
+
+    # ── Health check (no auth required) ──────────────────────────────────────
+    path("health/", health_check, name="health-check"),
+
+    # ── REST API ──────────────────────────────────────────────────────────────
+    path("", include("cakes.urls")),
+    path("", include("gallery.urls")),
+    path("", include("enquiries.urls")),   # POST /api/enquiries/
+
+    # ── Media uploads (served from /data/media in production) ─────────────────
+    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+
+    # ── Astro static frontend LAST (catch-all) ────────────────────────────────
+    re_path(r"^(?P<path>.*)$", serve_astro_frontend),
 ]
 
 if settings.DEBUG:

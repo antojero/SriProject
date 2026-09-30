@@ -1,8 +1,9 @@
 [phases.setup]
-nixPkgs = ["python312", "gcc"]
+nixPkgs = ["python312", "nodejs_20", "gcc"]
 
 [phases.install]
 cmds = [
+  "npm ci",
   "python3 -m venv /opt/venv",
   "/opt/venv/bin/pip install --upgrade pip",
   "/opt/venv/bin/pip install -r backend/requirements.txt"
@@ -10,9 +11,12 @@ cmds = [
 
 [phases.build]
 cmds = [
-  "cd backend && /opt/venv/bin/python manage.py collectstatic --noinput",
-  "cd backend && /opt/venv/bin/python manage.py migrate --noinput"
+  "npm run build",
+  "cd backend && /opt/venv/bin/python manage.py collectstatic --noinput"
 ]
+# NOTE: migrate intentionally NOT here.
+# Railway's PostgreSQL private networking is unavailable during build.
+# Migrations run as the Railway Pre-Deploy Command (set in railway.toml).
 
 [start]
-cmd = "cd backend && /opt/venv/bin/gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 120"
+cmd = "cd backend && /opt/venv/bin/gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"

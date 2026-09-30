@@ -105,30 +105,59 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 <script>
   const form = document.getElementById('enquiryForm') as HTMLFormElement;
   const statusDiv = document.getElementById('formStatus');
+  const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
 
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const formData = new FormData(form);
-      const name = formData.get('name') || '';
-      const phone = formData.get('phone') || '';
-      const cakeType = formData.get('cake_type') || 'Custom Cake';
-      const date = formData.get('required_date') || 'Flexible';
-      const message = formData.get('message') || '';
+      const name     = (formData.get('name')          as string) || '';
+      const phone    = (formData.get('phone')         as string) || '';
+      const cakeType = (formData.get('cake_type')     as string) || 'Custom Cake';
+      const date     = (formData.get('required_date') as string) || '';
+      const message  = (formData.get('message')       as string) || '';
 
-      const text = `Hi Creamy Delights!
-New Enquiry from Website:
-• Name: ${name}
-• Phone: ${phone}
-• Cake Type: ${cakeType}
-• Event Date: ${date}
-• Message: ${message}`;
+      // Disable button while submitting
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending…';
+      }
 
+      // ── Step 1: Save enquiry to PostgreSQL via Django API ──────────────
+      const apiHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'http://localhost:8000'
+        : '';
+
+      try {
+        await fetch(`${apiHost}/api/enquiries/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            phone,
+            cake_type: cakeType,
+            required_date: date || null,
+            message,
+          }),
+        });
+      } catch (err) {
+        // Non-blocking — API failure should never stop the WhatsApp redirect
+        console.error('Enquiry save error (non-blocking):', err);
+      }
+
+      // ── Step 2: Show success banner ─────────────────────────────────────
       if (statusDiv) statusDiv.style.display = 'block';
+
+      // ── Step 3: Open WhatsApp with prefilled message ────────────────────
+      const text = `Hi Creamy Delights!\nNew Enquiry from Website:\n• Name: ${name}\n• Phone: ${phone}\n• Cake Type: ${cakeType}\n• Event Date: ${date || 'Flexible'}\n• Message: ${message}`;
 
       setTimeout(() => {
         window.open(`https://wa.me/919159799861?text=${encodeURIComponent(text)}`, '_blank');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Send Enquiry via WhatsApp →';
+        }
       }, 500);
     });
   }

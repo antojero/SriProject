@@ -1,10 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import CakeCard from "../components/CakeCard.astro";
 import SectionHeading from "../components/SectionHeading.astro";
-import { cakes } from "../data/cakes";
-
-const featuredCakes = cakes.filter((cake) => cake.featured).slice(0, 6);
 ---
 
 <BaseLayout
@@ -44,7 +40,7 @@ const featuredCakes = cakes.filter((cake) => cake.featured).slice(0, 6);
     </div>
   </section>
 
-  <!-- Featured Cakes Section -->
+  <!-- Featured Cakes Section — loaded dynamically from Django API at runtime -->
   <section class="section" style="background: rgba(255, 255, 255, 0.6); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
     <div class="container">
       <SectionHeading 
@@ -52,11 +48,14 @@ const featuredCakes = cakes.filter((cake) => cake.featured).slice(0, 6);
         title="Made for every celebration" 
         description="Every cake is thoughtfully designed, baked fresh to order, and finished with meticulous detail."
       />
-      <div class="cake-grid">
-        {featuredCakes.map((cake) => (
-          <CakeCard cake={cake} />
+      <!-- Skeleton loader shown until API responds -->
+      <div id="featuredLoading" class="cake-grid">
+        {Array.from({ length: 3 }).map(() => (
+          <div class="cake-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); min-height: 380px; opacity: 0.4; animation: pulse 1.5s ease-in-out infinite;" />
         ))}
       </div>
+      <!-- Populated by browser-side JS after API fetch -->
+      <div class="cake-grid" id="featuredCakeGrid" style="display: none;"></div>
       <div style="text-align: center; margin-top: 48px;">
         <a href="/cakes" class="btn btn-secondary">View Complete Catalogue →</a>
       </div>
@@ -153,3 +152,71 @@ const featuredCakes = cakes.filter((cake) => cake.featured).slice(0, 6);
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 0.15; }
+  }
+</style>
+
+<script>
+  // ── Fetch featured cakes from Django API at browser runtime ────────────────
+  // Django Admin → mark Cake as Featured → PostgreSQL → /api/cakes/?featured=true
+  // → homepage reflects the change immediately, with no Astro rebuild needed.
+
+  interface FeaturedCake {
+    id: number;
+    name: string;
+    description: string;
+    image_url?: string;
+    image?: string;
+  }
+
+  const loadingEl  = document.getElementById('featuredLoading');
+  const gridEl     = document.getElementById('featuredCakeGrid');
+
+  async function loadFeaturedCakes() {
+    const apiHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:8000'
+      : '';
+
+    try {
+      const res = await fetch(`${apiHost}/api/cakes/?featured=true`);
+      if (!res.ok) throw new Error('API error');
+
+      const cakes: FeaturedCake[] = await res.json();
+
+      if (Array.isArray(cakes) && cakes.length > 0 && gridEl) {
+        gridEl.innerHTML = cakes.slice(0, 6).map(cake => {
+          const img = cake.image_url || cake.image || '/images/hero-cake.webp';
+          const msg = encodeURIComponent(`Hi Creamy Delights, I'd like to enquire about ordering the ${cake.name}.`);
+          const wa  = `https://wa.me/919159799861?text=${msg}`;
+          return `
+            <article class="cake-card">
+              <a href="${wa}" target="_blank" rel="noopener noreferrer" class="cake-image-wrap" aria-label="Enquire about ${cake.name}">
+                <img src="${img}" alt="${cake.name}" width="700" height="850" loading="lazy" />
+              </a>
+              <div class="cake-card-body">
+                <h3>${cake.name}</h3>
+                <p>${cake.description || 'Handcrafted celebration cake made fresh to order.'}</p>
+                <div class="cake-meta" style="justify-content: flex-end;">
+                  <a href="${wa}" target="_blank" rel="noopener noreferrer">Enquire on WhatsApp →</a>
+                </div>
+              </div>
+            </article>`;
+        }).join('');
+        if (loadingEl) loadingEl.style.display = 'none';
+        gridEl.style.display = 'grid';
+      } else {
+        // No featured cakes in DB — hide skeleton, show nothing (section header still shows)
+        if (loadingEl) loadingEl.style.display = 'none';
+      }
+    } catch {
+      // API unavailable — hide skeleton silently
+      if (loadingEl) loadingEl.style.display = 'none';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadFeaturedCakes);
+</script>
